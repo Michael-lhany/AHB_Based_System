@@ -34,6 +34,7 @@ logic 				   timer_status;   // 0x14 (Read only)
 //////////// Internal logic signals //////////////
 logic load;
 logic [DATA_WIDTH-1:0] wd_counter;
+logic [2:0] pwm_counter;
 
 
 
@@ -207,8 +208,24 @@ end
 ///////////////// PWM logic ////////////////////
 
 
-
-
+always_ff @(posedge clk or negedge rst) begin 
+	if(~rst) begin
+		pwm <= 1'b0;
+		pwm_counter <= 3'b000;
+	end else begin
+		if (timer_ctrl[2]) begin
+			pwm_counter <= pwm_counter + 1;
+			if (pwm_counter < pwm_thres) begin
+				pwm <= 1'b0;
+			end else begin
+				pwm <= 1;
+			end
+		end else begin
+			pwm_counter <= 3'b000;
+			pwm <= 1'b0;
+		end
+	end
+end
 
 
 

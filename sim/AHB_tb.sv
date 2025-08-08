@@ -116,33 +116,42 @@ initial begin
 
 
 ////////////////////////////////////////////////////////
-//////////////////// Timer tests /////////////////////// 
+///////////////// Timer/WD/PWM tests /////////////////// 
 ////////////////////////////////////////////////////////
 
-//Simple write (Data: 32'h05 & Address:{2'b01,30'h08} & Size: Word)
+//Simple write in the timer_ctrl reg (Data: 32'h05 & Address:{2'b01,30'h08} & Size: Word) to activate the normal mode timer
  Simple_Write({32'b001}, {2'b01,30'h00}, WORD);
 
-//Simple write (Data: 32'h05 & Address:{2'b01,30'h08} & Size: Word)
+//Simple write in the timer_load reg (Data: 32'h05 & Address:{2'b01,30'h08} & Size: Word)
  Simple_Write(32'h05, {2'b01,30'h04}, WORD);
 
  @(negedge  HCLK);
  @(negedge  HCLK);
 
- //Simple read (Address:32'h00 & Size: Word)
+ //Simple read from the timer_count reg (Address:{2'b01,30'h10} & Size: Word)
  Simple_Read({2'b01,30'h10}, WORD);
 
- //Simple read (Address:32'h00 & Size: Word)
+ //Simple read from the timer_status reg (Address:{2'b01,30'h14} & Size: Word)
  Simple_Read({2'b01,30'h14}, WORD);
 
+
+ //simple write in the timer_ctrl reg (Data: 32'b010 & Address:{2'b01,30'h08} & Size: Word) to activate the watch dog
  Simple_Write({32'b010}, {2'b01,30'h00}, WORD);
 
  @(posedge wd_rst);
 
  reset() ;
 
+ //simple write in the pwm_thres reg (Data: 32'b100 & Address:{2'b01,30'h08} & Size: Word) to change the threshold of the pwm
+ Simple_Write({32'b010}, {2'b01,30'h0C}, WORD);
 
+ //simple write in the timer_ctrl reg (Data: 32'b100 & Address:{2'b01,30'h08} & Size: Word) to activate the pwm
+ Simple_Write({32'b100}, {2'b01,30'h00}, WORD);
 
+@(posedge pwm);
+@(negedge pwm);
 
+@(negedge HCLK);
 
 ////////////////////////////////////////////////////////
 ////////////////// Reg File tests ////////////////////// 
