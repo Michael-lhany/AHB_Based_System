@@ -1,3 +1,5 @@
+`timescale 1ns/100ps
+
 module decoder #( parameter ADDR_WIDTH = 32 ) 
 (
 input logic [ADDR_WIDTH-1:0] HADDR,

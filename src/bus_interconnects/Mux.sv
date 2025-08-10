@@ -1,3 +1,5 @@
+`timescale 1ns/100ps
+
 module mux #( parameter DATA_WIDTH = 32) 
 (
 input logic [DATA_WIDTH-1:0] HRDATA0, HRDATA1, 
@@ -9,16 +11,16 @@ output logic HRESP,
 output logic HREADY  	
 );
 
-logic [3:0] select;  
+logic [1:0] selector;  
 
-assign select = {HSEL1,HSEL0};
+assign selector = {HSEL1,HSEL0};
 
 always @(*) begin
-	if (select == 4'b0001) begin
+	if (selector == 2'b01) begin
 		HRDATA = HRDATA0;
 		HRESP = HRESP0;
 		HREADY = HREADY0;
-	end else if (select == 4'b0010) begin
+	end else if (selector == 2'b10) begin
 		HRDATA = HRDATA1;
 		HRESP = HRESP1;
 		HREADY = HREADY1;

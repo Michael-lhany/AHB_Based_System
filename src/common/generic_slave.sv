@@ -1,3 +1,5 @@
+`timescale 1ns/100ps
+
 module generic_slave #(
 
 parameter DATA_WIDTH = 32,

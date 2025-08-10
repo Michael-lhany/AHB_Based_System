@@ -1,4 +1,6 @@
-module RESET_SYNCHRONIZER (
+`timescale 1ns/100ps
+
+module rst_sync (
 	input logic clk,    // Clock
 	input logic rst, // Clock Enable
 	output logic sync_rst  // Asynchronous reset active low	

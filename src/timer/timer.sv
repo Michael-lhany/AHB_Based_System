@@ -1,3 +1,5 @@
+`timescale 1ns/100ps
+
 module Timer #(
 
 parameter DATA_WIDTH = 32,
@@ -53,7 +55,7 @@ always_ff @(posedge clk or negedge rst) begin
 		if (wr_en && !rd_en) begin
 			unique case (address)
 				{2'b01,30'h00}: begin 
-					timer_ctrl <= wr_data;
+					timer_ctrl <= wr_data[7:0];
 					error <= 1'b0;
 				end
 		        {2'b01,30'h04}: begin
@@ -86,7 +88,7 @@ always_comb begin
 	if (rd_en && !wr_en) begin
 	    unique case (address)
 	        {2'b01,30'h00}: begin
-	        	rd_data = timer_ctrl;
+	        	rd_data = {24'b0,timer_ctrl};
 	        	ready = 1'b1;
 	     	end
 	        {2'b01,30'h04}: begin
@@ -107,10 +109,10 @@ always_comb begin
 	        end
 	        {2'b01,30'h14}: begin
 	        	if (timer_status) begin
-	        		rd_data = timer_status;
+	        		rd_data = {31'b0,timer_status};
 	        		ready = 1'b1;
 	        	end else begin
-	        		rd_data = timer_status;
+	        		rd_data = {31'b0,timer_status};
 	        		ready = 1'b0;
 	        	end
 	        end
@@ -159,7 +161,7 @@ always_ff @(posedge clk or negedge rst) begin
 					timer_count <= timer_count - 1;
 					timer_status <= 1'b0;
 				end else if (timer_count == 1) begin
-					timer_count = timer_count - 1;
+					timer_count <= timer_count - 1;
 					timer_status <= 1'b1;
 				end else begin
 					timer_status <= 1'b1;
@@ -215,7 +217,7 @@ always_ff @(posedge clk or negedge rst) begin
 	end else begin
 		if (timer_ctrl[2]) begin
 			pwm_counter <= pwm_counter + 1;
-			if (pwm_counter < pwm_thres) begin
+			if (pwm_counter < pwm_thres[2:0] ) begin
 				pwm <= 1'b0;
 			end else begin
 				pwm <= 1;

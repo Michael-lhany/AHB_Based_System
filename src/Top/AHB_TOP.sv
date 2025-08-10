@@ -1,3 +1,5 @@
+`timescale 1ns/100ps
+
 module AHB_TOP #(
 parameter DATA_WIDTH = 32,
 parameter REG_FILE_DEPTH = 16,
@@ -50,7 +52,7 @@ logic                  error_t;
 
 
 /////////////// Reset synchronizers //////////////////
-RESET_SYNCHRONIZER reset_sync(
+rst_sync reset_sync(
 .clk     (HCLK),
 .rst     (HRESETn),
 .sync_rst(sync_rst)
