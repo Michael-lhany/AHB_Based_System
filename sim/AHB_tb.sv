@@ -101,6 +101,10 @@ always #(CLK_PER/2) HCLK = ~HCLK ;
 
 initial begin
 
+ $dumpfile("ahb.vcd") ;       
+ $dumpvars(0,AHB_tb); 
+
+
  // Initialization
  initialize() ;
 
@@ -190,7 +194,7 @@ initial begin
 
  $display("correct_count: %d",correct_count);
  $display("error_count: %d",error_count);
- $stop ;
+ $finish ;
 
 end
 
