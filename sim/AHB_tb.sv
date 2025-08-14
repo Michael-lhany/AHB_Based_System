@@ -361,7 +361,7 @@ endtask
 task check_read_reg_file ;
   input logic [ADDR_WIDTH_tb-1:0] address;
   begin
-    assert (HRDATA == DUT.reg_file.memory[address]) begin
+    assert (HRDATA == DUT.reg_file.memory[address] && HRESP == 1'b0) begin
       $display("Read from address: %h with data %h is succcesful",address, HRDATA );
       correct_count = correct_count + 1;
     end else begin 
@@ -377,7 +377,7 @@ task check_read_timer ;
   begin
     @(posedge DUT.timer.timer_status);
     @(negedge HCLK);
-    assert (HRDATA[0]) begin
+    assert (HRDATA[0] && HRESP == 1'b0) begin
       $display("Timer has succeeded");
       correct_count = correct_count + 1;
     end else begin 
@@ -430,7 +430,7 @@ task Busy_Read ;
       check_read_reg_file(address);
     end
     if (address == {2'b01,30'h08}) begin
-      check_read_timer(address);
+      s(address);
     end
     @(negedge  HCLK);
     HTRANS = IDLE;
