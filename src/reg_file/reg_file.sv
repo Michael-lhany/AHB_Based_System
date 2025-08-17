@@ -48,7 +48,7 @@ always_ff @(posedge clk or negedge rst) begin
 	if(~rst) begin
 		error <= 1'b0;
 	end else begin
-		if ( address > REG_FILE_DEPTH ) begin
+		if ( address[ADDR_WIDTH-3:0] > REG_FILE_DEPTH ) begin
 			error <= 1'b1;
 		end else begin
 			error <= 1'b0;

@@ -25,10 +25,10 @@ output logic wd_rst
 
 
 /////////////// Internal signals //////////////////
-logic HSEL0, HSEL1;
-logic [DATA_WIDTH-1:0] HRDATA0, HRDATA1;
-logic HRESP0, HRESP1;
-logic HREADY0, HREADY1;
+logic HSEL0, HSEL1, HSEL2;
+logic [DATA_WIDTH-1:0] HRDATA0, HRDATA1, HRDATA2;
+logic HRESP0, HRESP1, HRESP2;
+logic HREADY0, HREADY1, HREADY2;
 logic sync_rst;
 
 //Reg file signals
@@ -49,6 +49,24 @@ logic [DATA_WIDTH-1:0] rd_data_t;
 logic                  ready_t;
 logic                  error_t; 
 
+//APB bridge signals
+logic                  PSEL;
+logic                  PENABLE;
+logic [ADDR_WIDTH-1:0] PADDR;
+logic [DATA_WIDTH-1:0] PWDATA;
+logic [DATA_WIDTH-1:0] PRDATA;
+logic                  PREADY;
+logic                  PSLVERR;
+
+//APB Reg file signals
+logic                  rd_en_r_apb;
+logic                  wr_en_r_apb;
+logic [ADDR_WIDTH-1:0] address_r_apb;
+logic [DATA_WIDTH-1:0] wr_data_r_apb;
+logic [DATA_WIDTH-1:0] rd_data_r_apb;
+logic                  ready_r_apb;
+logic                  error_r_apb;
+
 
 
 /////////////// Reset synchronizers //////////////////
@@ -65,7 +83,8 @@ rst_sync reset_sync(
 decoder  #( .ADDR_WIDTH(ADDR_WIDTH) ) dec (
 .HADDR(HADDR),
 .HSEL0(HSEL0),
-.HSEL1(HSEL1)
+.HSEL1(HSEL1),
+.HSEL2(HSEL2)
 );
 
 
@@ -75,12 +94,16 @@ decoder  #( .ADDR_WIDTH(ADDR_WIDTH) ) dec (
 mux  #( .DATA_WIDTH(DATA_WIDTH) ) bus_mux(
 .HSEL0  (HSEL0),
 .HSEL1  (HSEL1),
-.HRESP1 (HRESP1),
+.HSEL2  (HSEL2),
 .HRESP0 (HRESP0),
+.HRESP1 (HRESP1),
+.HRESP2 (HRESP2),
 .HRDATA0(HRDATA0),
 .HRDATA1(HRDATA1),
+.HRDATA2(HRDATA2),
 .HREADY0(HREADY0),
 .HREADY1(HREADY1),
+.HREADY2(HREADY2),
 .HREADY (HREADY),
 .HRESP  (HRESP),
 .HRDATA (HRDATA)
@@ -173,6 +196,63 @@ generic_slave slave_timer (
 .wr_data(wr_data_t)
 );
 
+
+/////////////////// ahb2apb bridge /////////////////////
+ahb2apb_bridge #(.DATA_WIDTH(DATA_WIDTH), .ADDR_WIDTH(ADDR_WIDTH)) ahb2apb (
+.HCLK   (HCLK),
+.HRESETn(sync_rst),
+.HSEL   (HSEL2),
+.HADDR  (HADDR),
+.HTRANS (HTRANS),
+.HWRITE (HWRITE),
+.HSIZE  (HSIZE),
+.HWDATA (HWDATA),
+.HRDATA (HRDATA2),
+.HREADY (HREADY2),
+.HRESP  (HRESP2),
+.PSEL   (PSEL),
+.PENABLE(PENABLE),
+.PWRITE (PWRITE),
+.PADDR  (PADDR),
+.PWDATA (PWDATA),
+.PRDATA (PRDATA),
+.PREADY (PREADY),
+.PSLVERR(PSLVERR)
+);
+
+
+/////////////////// APB slave  /////////////////////
+generic_apb_slave #(.DATA_WIDTH(DATA_WIDTH), .ADDR_WIDTH(ADDR_WIDTH)) slave_apb_reg (
+.PSEL   (PSEL),
+.PENABLE(PENABLE),
+.PWRITE (PWRITE),
+.PADDR  (PADDR),
+.PWDATA (PWDATA),
+.error  (error_r_apb),
+.rd_en  (rd_en_r_apb),
+.ready  (ready_r_apb),
+.wr_en  (wr_en_r_apb),
+.address(address_r_apb),
+.rd_data(rd_data_r_apb),
+.wr_data(wr_data_r_apb),
+.PRDATA (PRDATA),
+.PREADY (PREADY),
+.PSLVERR(PSLVERR)
+);
+
+
+///////////////// APB Register File ///////////////////
+Reg_File #(.DATA_WIDTH(DATA_WIDTH), .REG_FILE_DEPTH(REG_FILE_DEPTH)) apb_reg_file (
+.clk (HCLK),
+.rst (sync_rst),
+.rd_data(rd_data_r_apb),
+.ready  (ready_r_apb),
+.error  (error_r_apb),
+.rd_en  (rd_en_r_apb),
+.wr_en  (wr_en_r_apb),
+.address(address_r_apb),
+.wr_data(wr_data_r_apb)
+);
 
 
 endmodule 
