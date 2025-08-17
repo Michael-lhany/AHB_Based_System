@@ -187,7 +187,8 @@ initial begin
  INCR_4_Write(32'h00, '{32'h4,32'h3,32'h2,32'h1},WORD);
 
 
-
+//Simple write in the timer_ctrl reg (Data: 32'h05 & Address:{2'b01,30'h08} & Size: Word) to activate the normal mode timer
+ Simple_Write({32'b001}, {2'b10,30'h0c}, WORD);
 
 
  #(CLK_PER*10);
@@ -429,8 +430,8 @@ task Busy_Read ;
     if (address[31:30] == 2'b00) begin
       check_read_reg_file(address);
     end
-    if (address == {2'b01,30'h08}) begin
-      s(address);
+    if (address == {2'b01,30'h014}) begin
+      check_read_timer(address);
     end
     @(negedge  HCLK);
     HTRANS = IDLE;
