@@ -186,12 +186,17 @@ initial begin
 //INCR transfers
  INCR_4_Write(32'h00, '{32'h4,32'h3,32'h2,32'h1},WORD);
 
+////////////////////////////////////////////////////////
+////////////////// APB2AHB bridge ////////////////////// 
+////////////////////////////////////////////////////////
 
 //Simple write in the timer_ctrl reg (Data: 32'h05 & Address:{2'b01,30'h08} & Size: Word) to activate the normal mode timer
  Simple_Write({32'b001}, {2'b10,30'h0c}, WORD);
+ @(negedge HCLK);
+//Simple read (Address:32'h00 & Size: Word)
+ Simple_Read({2'b10,30'h0c}, WORD);
 
-
- #(CLK_PER*10);
+ #(CLK_PER*5);
 
  $display("correct_count: %d",correct_count);
  $display("error_count: %d",error_count);
@@ -269,7 +274,7 @@ task Simple_Read ;
     @(negedge HCLK);
     HTRANS = IDLE;
     HWRITE = WRITE;
-    if (address[31:30] == 2'b00) begin
+    if (address[31:30] == 2'b00 || address[31:30] == 2'b10) begin
       check_read_reg_file(address);
     end
     if (address == {2'b01,30'h014}) begin
@@ -362,12 +367,25 @@ endtask
 task check_read_reg_file ;
   input logic [ADDR_WIDTH_tb-1:0] address;
   begin
-    assert (HRDATA == DUT.reg_file.memory[address] && HRESP == 1'b0) begin
-      $display("Read from address: %h with data %h is succcesful",address, HRDATA );
-      correct_count = correct_count + 1;
-    end else begin 
-      error_count = error_count + 1;
-    end 
+    if (address[31:30] == 2'b00) begin
+      assert (HRDATA == DUT.reg_file.memory[address] && HRESP == 1'b0) begin
+        $display("Read from address: %h with data %h is succcesful",address, HRDATA );
+        correct_count = correct_count + 1;
+      end else begin 
+        error_count = error_count + 1;
+      end
+    end else begin
+      @(posedge HREADY);
+      @(negedge HCLK);
+      @(negedge HCLK);
+      assert (HRDATA == DUT.apb_reg_file.memory[{2'b00,address[29:0]}] && HRESP == 1'b0) begin
+        $display("Read from address: %h with data %h is succcesful",{2'b00,address[29:0]}, HRDATA );
+        correct_count = correct_count + 1;
+      end else begin 
+        error_count = error_count + 1;
+      end
+       @(negedge HCLK);
+    end
   end
 endtask
 
