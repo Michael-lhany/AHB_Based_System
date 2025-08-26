@@ -49,9 +49,25 @@ typedef enum logic [2:0]   {  SINGLE = 3'b000 ,
                               WRAP16 = 3'b110 ,
                               INCR16 = 3'b111  } hburst;
 
-//Correct and error counts
+
+
+//Testbench logic signals
 int correct_count;
 int error_count;
+logic master;
+
+
+logic [3:0] HPROT;
+logic [ADDR_WIDTH_tb-1:0] HADDR;
+logic [DATA_WIDTH_tb-1:0] HWDATA;
+logic HREADY;
+logic [DATA_WIDTH_tb-1:0] HRDATA;
+logic HRESP;
+hwrite HWRITE;
+hsize HSIZE;
+htrans HTRANS;
+hburst HBURST;
+
 
 logic [ADDR_WIDTH_tb-1:0] addresses [0:7];
 
@@ -59,23 +75,46 @@ logic [ADDR_WIDTH_tb-1:0] addresses [0:7];
 //////////////////// DUT Signals ////////////////////////
 /////////////////////////////////////////////////////////
 
-//Inputs to the DUT
-logic HCLK;
-logic HRESETn;
-hwrite HWRITE;
-hsize HSIZE;
-logic [3:0] HPROT;
-hburst HBURST;
-logic [ADDR_WIDTH_tb-1:0] HADDR;
-htrans HTRANS;
-logic [DATA_WIDTH_tb-1:0] HWDATA;
+//////////////// COMMON SIGNALS //////////////////
 
-//Outputs from the DUT
-logic HREADY;
-logic HRESP;
-logic [DATA_WIDTH_tb-1:0] HRDATA;
-logic pwm;
-logic wd_rst;
+
+logic          HCLK;
+logic          HRESETn;
+logic          pwm;
+logic          wd_rst;
+
+/////////////// MASTER 0 INTERFACE //////////////////
+
+
+logic [ADDR_WIDTH_tb-1:0] HADDR_M0;
+hwrite                    HWRITE_M0;
+logic [DATA_WIDTH_tb-1:0] HWDATA_M0;
+htrans                    HTRANS_M0;
+hsize                     HSIZE_M0;
+logic [3:0]               HPROT_M0;
+hburst                    HBURST_M0;
+logic                     req0;
+
+logic [DATA_WIDTH_tb-1:0] HRDATA_M0;
+logic                     HREADY_M0;
+logic                     HRESP_M0;
+
+
+/////////////// MASTER 1 INTERFACE //////////////////
+
+
+logic [ADDR_WIDTH_tb-1:0] HADDR_M1;
+hwrite                    HWRITE_M1;
+logic [DATA_WIDTH_tb-1:0] HWDATA_M1;
+htrans                    HTRANS_M1;
+hsize                     HSIZE_M1;
+logic [3:0]               HPROT_M1;
+hburst                    HBURST_M1;
+logic                     req1;
+
+logic [DATA_WIDTH_tb-1:0] HRDATA_M1;
+logic                     HREADY_M1;
+logic                     HRESP_M1;
 
 
 //////////////////////////////////////////////////////// 
@@ -87,9 +126,41 @@ AHB_TOP #(.DATA_WIDTH(DATA_WIDTH_tb),.REG_FILE_DEPTH(REG_FILE_DEPTH_tb),.ADDR_WI
 
 
 //////////////////////////////////////////////////////// 
-///////////////////// Clock Generator //////////////////
+///////////////////// Master logic /////////////////////
 ////////////////////////////////////////////////////////
  
+
+always_comb begin
+  if (!master) begin
+    HADDR_M0 = HADDR;
+    HWRITE_M0 = HWRITE;
+    HWDATA_M0 = HWDATA;
+    HTRANS_M0 = HTRANS;
+    HSIZE_M0 = HSIZE;
+    HPROT_M0 = HPROT;
+    HBURST_M0 = HBURST;
+    HREADY = HREADY_M0;
+    HRDATA = HRDATA_M0;
+    HRESP = HRESP_M0;
+  end else begin
+    HADDR_M1 = HADDR;
+    HWRITE_M1 = HWRITE;
+    HWDATA_M1 = HWDATA;
+    HTRANS_M1 = HTRANS;
+    HSIZE_M1 = HSIZE;
+    HPROT_M1 = HPROT;
+    HBURST_M1 = HBURST;
+    HREADY = HREADY_M1;
+    HRDATA = HRDATA_M1;
+    HRESP = HRESP_M1;
+  end
+end
+
+
+//////////////////////////////////////////////////////// 
+///////////////////// Clock Generator //////////////////
+////////////////////////////////////////////////////////
+
 
 always #(CLK_PER/2) HCLK = ~HCLK ;
 
@@ -113,12 +184,9 @@ initial begin
  reset() ;
 
 
-
-
-
-
-
-
+master = 1'b0;
+req0 = 1;
+req1 = 0;
 ////////////////////////////////////////////////////////
 ///////////////// Timer/WD/PWM tests /////////////////// 
 ////////////////////////////////////////////////////////
@@ -157,6 +225,11 @@ initial begin
 
 @(negedge HCLK);
 
+
+master = 1'b1;
+req0 = 0;
+req1 = 1;
+
 ////////////////////////////////////////////////////////
 ////////////////// Reg File tests ////////////////////// 
 ////////////////////////////////////////////////////////
@@ -186,6 +259,11 @@ initial begin
 //INCR transfers
  INCR_4_Write(32'h00, '{32'h4,32'h3,32'h2,32'h1},WORD);
 
+
+master = 1'b0;
+req0 = 1;
+req1 = 1;
+
 ////////////////////////////////////////////////////////
 ////////////////// APB2AHB bridge ////////////////////// 
 ////////////////////////////////////////////////////////
@@ -214,14 +292,30 @@ end
 task initialize ;
   begin
   	HCLK   	       	= 1'b0;
-  	HRESETn        	= 1'b1;    
-  	HWRITE     		  = WRITE;
-  	HSIZE          	= WORD;
+  	HRESETn        	= 1'b1;
+    HWRITE          = WRITE;
+    HSIZE           = WORD;
     HTRANS          = IDLE;
-  	HPROT          	= 4'b0011;
-  	HBURST          = SINGLE;
-  	HADDR          	= {ADDR_WIDTH_tb{1'b0}};
-  	HWDATA          = {DATA_WIDTH_tb{1'b0}};
+    HPROT           = 4'b0011;
+    HBURST          = SINGLE;
+    HADDR           = {ADDR_WIDTH_tb{1'b0}};
+    HWDATA          = {DATA_WIDTH_tb{1'b0}};   
+  	HWRITE_M0     	= WRITE;
+  	HSIZE_M0        = WORD;
+    HTRANS_M0       = IDLE;
+  	HPROT_M0        = 4'b0011;
+  	HBURST_M0       = SINGLE;
+  	HADDR_M0        = {ADDR_WIDTH_tb{1'b0}};
+  	HWDATA_M0       = {DATA_WIDTH_tb{1'b0}};
+    HWRITE_M1       = WRITE;
+    HSIZE_M1        = WORD;
+    HTRANS_M1       = IDLE;
+    HPROT_M1        = 4'b0011;
+    HBURST_M1       = SINGLE;
+    HADDR_M1        = {ADDR_WIDTH_tb{1'b0}};
+    HWDATA_M1       = {DATA_WIDTH_tb{1'b0}};
+    req0            = 0;
+    req1            = 0;
     correct_count   = 0;
     error_count     = 0;
   end
@@ -457,4 +551,6 @@ task Busy_Read ;
   end
 endtask
 
-endmodule
+
+
+endmodule : AHB_tb
