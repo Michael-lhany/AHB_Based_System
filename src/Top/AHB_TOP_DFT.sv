@@ -15,17 +15,19 @@ input logic [ADDR_WIDTH-1:0] HADDR,
 input logic HWRITE,
 input logic [1:0] HTRANS,
 input logic [DATA_WIDTH-1:0] HWDATA,
+output logic HREADY,
+output logic [DATA_WIDTH-1:0] HRDATA,
+output logic HRESP,
+output logic pwm, 
+output logic wd_rst,
+
+// DFT signals 
 input logic scan_in,
 input logic scan_shift_en,
 input logic test_mode,
 input logic scan_clk,
 input logic scan_rst,
-output logic scan_out,
-output logic HREADY,
-output logic [DATA_WIDTH-1:0] HRDATA,
-output logic HRESP,
-output logic pwm, 
-output logic wd_rst
+output logic scan_out
 );
 
 
@@ -93,8 +95,6 @@ rst_sync reset_sync(
 .rst     (ref_scan_rst),
 .sync_rst(sync_rst)
 );
-
-
 
 
 /////////////////// Bus decoder /////////////////////
