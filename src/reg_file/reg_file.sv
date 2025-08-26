@@ -34,7 +34,7 @@ always_ff @(posedge clk or negedge rst) begin
           memory[i] <= 0 ;
         end       
 	end else begin
-		if (wr_en && !rd_en) begin
+		if (wr_en && !rd_en && !(address[ADDR_WIDTH-3:0] >= REG_FILE_DEPTH) ) begin
 			memory[address[REG_FILE_ADDR-1:0]] <= wr_data;
 		end
 	end
@@ -48,7 +48,7 @@ always_ff @(posedge clk or negedge rst) begin
 	if(~rst) begin
 		error <= 1'b0;
 	end else begin
-		if ( address[ADDR_WIDTH-3:0] > REG_FILE_DEPTH ) begin
+		if ( address[ADDR_WIDTH-3:0] >= REG_FILE_DEPTH ) begin
 			error <= 1'b1;
 		end else begin
 			error <= 1'b0;
