@@ -43,42 +43,6 @@ The system includes:
 * Supports extension for additional masters.
 * Can integrate fixed-priority or round-robin arbitration schemes.
 
----
-
-## **Directory Structure**
-
-```
-/src
-   ├── ahb_master.sv
-   ├── ahb_slave_regfile.sv
-   ├── timer_module.sv
-   ├── ahb2apb_bridge.sv
-   └── arbiter.sv
-/testbench
-   ├── tb_top.sv
-   └── ...
-/docs
-   ├── block_diagram.png
-   └── protocol_reference.pdf
-```
-
----
-
-## **Getting Started**
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/yourusername/ahb-lite-multislave.git
-   ```
-2. Simulate with your preferred HDL simulator (e.g., ModelSim, QuestaSim, Verilator):
-
-   ```bash
-   make run
-   ```
-3. Open `docs/block_diagram.png` for architecture reference.
-
----
 
 ## **Block Diagram**
 
