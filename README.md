@@ -1,6 +1,6 @@
 # AHB-Lite Multi-Slave Bus System
 
-This project implements an **AMBA AHB-Lite** bus system with multiple slaves. It demonstrates **multi-master support**, **address decoding**, **AHB-to-APB bridging**, and **peripheral integration**.
+This project implements an **AMBA AHB-Lite** bus system with multiple slaves. It demonstrates **multi-master support**, **two ahb layers**, **address decoding**, **AHB-to-APB bridging**, and **peripheral integration**.
 
 ---
 
@@ -45,12 +45,3 @@ The system includes:
 
 
 ## **Block Diagram**
-
-*(Insert your diagram here – showing Masters, AHB Bus, Slaves, AHB-to-APB Bridge, Arbitration)*
-
----
-
-## **License**
-
-This project is licensed under the MIT License – see [LICENSE](LICENSE) for details.
-
