@@ -15,7 +15,7 @@ input  logic [1:0]            HTRANS_M0,
 input  logic [2:0]            HSIZE_M0,
 input  logic [3:0]            HPROT_M0,
 input  logic [2:0]            HBURST_M0,
-input  logic                  req0,
+input  logic                  HSEL_0,
 
 output logic [DATA_WIDTH-1:0] HRDATA_M0,
 output logic                  HREADY_M0,
@@ -32,7 +32,7 @@ input  logic [1:0]            HTRANS_M1,
 input  logic [2:0]            HSIZE_M1,
 input  logic [3:0]            HPROT_M1,
 input  logic [2:0]            HBURST_M1,
-input  logic                  req1,
+input  logic                  HSEL_1,
 
 output logic [DATA_WIDTH-1:0] HRDATA_M1,
 output logic                  HREADY_M1,
@@ -49,6 +49,7 @@ output logic [1:0]            HTRANS_OUT,
 output logic [2:0]            HSIZE_OUT,
 output logic [3:0]            HPROT_OUT,
 output logic [2:0]            HBURST_OUT,
+output logic                  HSEL_OUT,
 input  logic [DATA_WIDTH-1:0] HRDATA_IN,
 input  logic                  HREADY_IN,
 input  logic                  HRESP_IN
@@ -66,9 +67,9 @@ always_comb begin
     grant0 = 0;
     grant1 = 0;
 
-    if (req0) begin 
+    if (HSEL_0) begin 
         grant0 = 1;
-    end else if (req1) begin
+    end else if (HSEL_1) begin
         grant1 = 1;
     end
 end
@@ -84,16 +85,17 @@ assign HTRANS_OUT = grant0 ? HTRANS_M0 : HTRANS_M1;
 assign HSIZE_OUT  = grant0 ? HSIZE_M0  : HSIZE_M1;
 assign HPROT_OUT  = grant0 ? HPROT_M0  : HPROT_M1;
 assign HBURST_OUT = grant0 ? HBURST_M0 : HBURST_M1;
+assign HSEL_OUT   = grant0 ? HSEL_0    : HSEL_1;
 
 /////////////// RETURN SLAVE RESPONSES TO THE GRANTED MASTER ONLY //////////////////
 
 
-assign HRDATA_M0   = grant0 ? HRDATA_IN   : '0;
-assign HREADY_M0 = grant0 ? HREADY_IN    : 1'b0;
-assign HRESP_M0    = grant0 ? HRESP_IN    : 1'b0;
+assign HRDATA_M0  = grant0 ? HRDATA_IN   : '0;
+assign HREADY_M0  = grant0 ? HREADY_IN   : 1'b0;
+assign HRESP_M0   = grant0 ? HRESP_IN    : 1'b0;
 
-assign HRDATA_M1   = grant1 ? HRDATA_IN   : '0;
-assign HREADY_M1 = grant1 ? HREADY_IN    : 1'b0;
-assign HRESP_M1    = grant1 ? HRESP_IN    : 1'b0;
+assign HRDATA_M1  = grant1 ? HRDATA_IN   : '0;
+assign HREADY_M1  = grant1 ? HREADY_IN   : 1'b0;
+assign HRESP_M1   = grant1 ? HRESP_IN    : 1'b0;
 
 endmodule
