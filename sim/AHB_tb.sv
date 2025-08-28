@@ -93,7 +93,6 @@ htrans                    HTRANS_M0;
 hsize                     HSIZE_M0;
 logic [3:0]               HPROT_M0;
 hburst                    HBURST_M0;
-logic                     req0;
 
 logic [DATA_WIDTH_tb-1:0] HRDATA_M0;
 logic                     HREADY_M0;
@@ -110,7 +109,6 @@ htrans                    HTRANS_M1;
 hsize                     HSIZE_M1;
 logic [3:0]               HPROT_M1;
 hburst                    HBURST_M1;
-logic                     req1;
 
 logic [DATA_WIDTH_tb-1:0] HRDATA_M1;
 logic                     HREADY_M1;
@@ -185,8 +183,6 @@ initial begin
 
 
 master = 1'b0;
-req0 = 1;
-req1 = 0;
 ////////////////////////////////////////////////////////
 ///////////////// Timer/WD/PWM tests /////////////////// 
 ////////////////////////////////////////////////////////
@@ -227,8 +223,6 @@ req1 = 0;
 
 
 master = 1'b1;
-req0 = 0;
-req1 = 1;
 
 ////////////////////////////////////////////////////////
 ////////////////// Reg File tests ////////////////////// 
@@ -261,8 +255,7 @@ req1 = 1;
 
 
 master = 1'b0;
-req0 = 1;
-req1 = 1;
+
 
 ////////////////////////////////////////////////////////
 ////////////////// APB2AHB bridge ////////////////////// 
@@ -314,8 +307,6 @@ task initialize ;
     HBURST_M1       = SINGLE;
     HADDR_M1        = {ADDR_WIDTH_tb{1'b0}};
     HWDATA_M1       = {DATA_WIDTH_tb{1'b0}};
-    req0            = 0;
-    req1            = 0;
     correct_count   = 0;
     error_count     = 0;
   end
